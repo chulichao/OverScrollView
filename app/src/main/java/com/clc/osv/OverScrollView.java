@@ -33,7 +33,6 @@ public class OverScrollView extends ScrollView {
     }
 
     private void init() {
-        Log.d(TAG, "initView: ");
         // 去除原本ScrollView的边界反馈
         setOverScrollMode(OVER_SCROLL_NEVER);
         mRect = new Rect();
@@ -44,30 +43,34 @@ public class OverScrollView extends ScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_UP:
                 // 松手恢复
                 if (!mRect.isEmpty()) {
                     rebound();
                     mRect.setEmpty();
-                    mLastY = 0;
                 }
+                mLastY = 0;
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                mLastY = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float currentY = event.getY();
                 int distanceY = (int) (mLastY - currentY);
-                if ((isToTop() && distanceY < 0) || (isToBottom() && distanceY > 0)) {
-                    Log.d(TAG, "onTouchEvent: move" + getScrollY());
+                if (mLastY != 0 && (isToTop() && distanceY < 0) || (isToBottom() && distanceY > 0)) {
                     if (mRect.isEmpty()) {
-                        // 保存正常的布局位置
+                        // 保存正常的子view位置
                         mRect.set(mInnerView.getLeft(), mInnerView.getTop(), mInnerView.getRight(), mInnerView.getBottom());
                     }
-                    // 移动布局， 使distance / 2 防止平移过快
+                    // 设置滑动阻尼效果
                     mInnerView.layout(mInnerView.getLeft(), mInnerView.getTop() - distanceY / DAMPING_NUM,
                             mInnerView.getRight(), mInnerView.getBottom() - distanceY / DAMPING_NUM);
                 }
                 mLastY = currentY;
                 break;
+            default:
+                // Do nothing.
         }
         return super.onTouchEvent(event);
     }
