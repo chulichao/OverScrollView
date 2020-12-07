@@ -3,7 +3,6 @@ package com.clc.osv;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.TranslateAnimation;
@@ -87,6 +86,13 @@ public class OverScrollView extends ScrollView {
     }
 
     private boolean isToBottom() {
+        /**
+         * getMeasuredHeight()与getHeight的区别:
+         * 实际上在当屏幕可以包裹内容的时候，他们的值相等，
+         * 只有当view超出屏幕后，才能看出他们的区别：
+         * getMeasuredHeight()是实际View的大小，与屏幕无关，而getHeight的大小此时则是屏幕的大小。
+         * 当超出屏幕后，getMeasuredHeight()等于getHeight()加上屏幕之外没有显示的大小
+         */
         int offset = mInnerView.getMeasuredHeight() - getHeight();
         return getScrollY() == offset;
     }
